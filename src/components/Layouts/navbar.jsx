@@ -44,7 +44,7 @@ function UserMenu() {
       <DropdownMenuContent align="end" className="bg-white border shadow-md">
         <DropdownMenuItem className="flex items-center hover:bg-accent">
           <User className="mr-2 h-4 w-4" />
-          <span>Juan Pérez</span>
+          <span>Equipo 6</span>
         </DropdownMenuItem>
         <DropdownMenuItem className="hover:bg-accent">
           <a href="/" className="flex items-center w-full">
