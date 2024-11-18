@@ -1,16 +1,35 @@
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button"
+import { Link } from "react-router-dom"
 
 export default function DetallesPago() {
     const [activeTab, setActiveTab] = useState("general")
     const location = useLocation();
+    const [loading, setLoading] = useState(true);
     const { pago } = location.state || {}; // Extrae el objeto 'pago'
     const paymentData = pago || {}; // Si 'pago' no existe, asigna un objeto vacío
+
+    useEffect(() => {
+        const timer = setTimeout(() => setLoading(false), 1000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="flex flex-row items-center gap-4 text-center">
+                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-500"></div>
+                    <p className="text-lg font-medium">Cargando detalles del pago...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto py-10 px-4">
@@ -152,6 +171,18 @@ export default function DetallesPago() {
                         </div>
                     </Tabs>
                 </CardContent>
+                <div className="flex justify-end items-center p-2">
+                    <Link
+                        to="/pagos"
+                    >
+                        <Button
+                            variant="outline"
+                            className="rounded-lg"
+                        >
+                            Atras
+                        </Button>
+                    </Link>
+                </div>
             </Card>
         </div>
     )
