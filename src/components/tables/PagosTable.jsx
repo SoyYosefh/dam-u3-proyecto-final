@@ -25,7 +25,7 @@ import {
 } from '@tanstack/react-table'
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import PropTypes from 'prop-types'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from "react-router-dom"
 
 const SortableHeader = ({ column, title }) => {
@@ -111,6 +111,7 @@ const columns = [
 export default function PaymentTable({ data = [] }) {
     const [sorting, setSorting] = useState([])
     const [columnVisibility, setColumnVisibility] = useState({})
+    const [loadingTable, setLoadingTable] = useState(true);
     const [pagination, setPagination] = useState({
         pageIndex: 0,
         pageSize: 10,
@@ -131,6 +132,23 @@ export default function PaymentTable({ data = [] }) {
             pagination,
         },
     })
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLoadingTable(false)
+        }, 1000)
+
+        return () => clearTimeout(timer)
+    }, [])
+
+    if (loadingTable) {
+        return (
+            <div className="flex items-center justify-center gap-4 p-4 bg-gray-100 rounded-md">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-500"></div>
+                <p>Cargando datos, por favor espera...</p>
+            </div>
+        )
+    }
 
     if (!data || data.length === 0) {
         return (
