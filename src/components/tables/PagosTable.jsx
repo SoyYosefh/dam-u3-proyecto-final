@@ -16,6 +16,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+
+import { useToast } from "@/hooks/use-toast"
 import {
     flexRender,
     getCoreRowModel,
@@ -23,10 +25,22 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
-import PropTypes from 'prop-types'
-import { useState, useEffect } from 'react'
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, Eye, Trash2 } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from "react-router-dom"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import NuevoPagoModal from '@/components/modals/NuevoPagoModal'
+
 
 const SortableHeader = ({ column, title }) => {
     return (
@@ -46,69 +60,8 @@ const SortableHeader = ({ column, title }) => {
     )
 }
 
-const columns = [
-    {
-        accessorKey: "idpago",
-        header: ({ column }) => <SortableHeader column={column} title="ID Pago" />,
-    },
-    {
-        accessorKey: "IdInstitutoOK",
-        header: ({ column }) => <SortableHeader column={column} title="ID Instituto" />,
-    },
-    {
-        accessorKey: "IdNegocioOK",
-        header: ({ column }) => <SortableHeader column={column} title="ID Negocio" />,
-    },
-    {
-        accessorKey: "IdPagoOK",
-        header: ({ column }) => <SortableHeader column={column} title="ID Pago OK" />,
-    },
-    {
-        accessorKey: "IdPagoBK",
-        header: ({ column }) => <SortableHeader column={column} title="ID Pago BK" />,
-    },
-    {
-        accessorKey: "IdOrdenOK",
-        header: ({ column }) => <SortableHeader column={column} title="ID Orden" />,
-    },
-    {
-        accessorKey: "MontoTotal",
-        header: ({ column }) => <SortableHeader column={column} title="Monto Total" />,
-        cell: ({ row }) => {
-            const amount = parseFloat(row.getValue("MontoTotal"))
-            const formatted = new Intl.NumberFormat("es-MX", {
-                style: "currency",
-                currency: "MXN",
-            }).format(amount)
-            return <div className="text-right font-medium">{formatted}</div>
-        },
-    },
-    {
-        accessorKey: "Observacion",
-        header: "Observación",
-    },
-    {
-        id: "actions",
-        cell: ({ row }) => {
-            const payment = row.original
-            return (
-                <Link
-                    to="/pagos/detalle"
-                    state={{ pago: payment }} // Pasar el objeto completo como state
-                >
-                    <Button
-                        variant="outline"
-                        className="rounded-lg"
-                    >
-                        Ver Detalles
-                    </Button>
-                </Link>
-            )
-        },
-    },
-]
-
-export default function PaymentTable({ data = [] }) {
+export default function PaymentTable({ dataPagos = [], onDeletePago }) {
+    const [data, setData] = useState(dataPagos)
     const [sorting, setSorting] = useState([])
     const [columnVisibility, setColumnVisibility] = useState({})
     const [loadingTable, setLoadingTable] = useState(true);
@@ -116,6 +69,123 @@ export default function PaymentTable({ data = [] }) {
         pageIndex: 0,
         pageSize: 10,
     })
+
+    const { toast } = useToast()
+
+    const handleDelete = useCallback(async (paymentId) => {
+        try {
+            const res = await onDeletePago(paymentId);
+            if (res) {
+                setData(prevData => prevData.filter(payment => payment.IdPagoOK !== paymentId));
+                toast({
+                    title: "Pago eliminado",
+                    description: "El pago se ha eliminado correctamente.",
+                    variant: "success",
+                });
+            } else {
+                throw new Error(res.message || "Error al eliminar el pago");
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: error.message || "No se pudo eliminar el pago. Por favor, inténtelo de nuevo.",
+                variant: "destructive",
+            });
+        }
+    }, [onDeletePago, toast]);
+
+    const columns = [
+        // {
+        //     accessorKey: "idpago",
+        //     header: ({ column }) => <SortableHeader column={column} title="ID Pago" />,
+        // },
+        {
+            accessorKey: "IdInstitutoOK",
+            header: ({ column }) => <SortableHeader column={column} title="ID Instituto" />,
+        },
+        {
+            accessorKey: "IdNegocioOK",
+            header: ({ column }) => <SortableHeader column={column} title="ID Negocio" />,
+        },
+        {
+            accessorKey: "IdPagoOK",
+            header: ({ column }) => <SortableHeader column={column} title="ID Pago OK" />,
+        },
+        {
+            accessorKey: "IdPagoBK",
+            header: ({ column }) => <SortableHeader column={column} title="ID Pago BK" />,
+        },
+        {
+            accessorKey: "IdOrdenOK",
+            header: ({ column }) => <SortableHeader column={column} title="ID Orden" />,
+        },
+        {
+            accessorKey: "MontoTotal",
+            header: ({ column }) => <SortableHeader column={column} title="Monto Total" />,
+            cell: ({ row }) => {
+                const amount = parseFloat(row.getValue("MontoTotal"))
+                const formatted = new Intl.NumberFormat("es-MX", {
+                    style: "currency",
+                    currency: "MXN",
+                }).format(amount)
+                return <div className="text-right font-medium">{formatted}</div>
+            },
+        },
+        {
+            accessorKey: "Observacion",
+            header: "Observación",
+        },
+        {
+            id: "actions",
+            header: "Acciones",
+            cell: ({ row }) => {
+                const payment = row.original
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
+                return (
+                    <div className="flex">
+                        <Link
+                            to="/pagos/detalle"
+                            state={{ pago: payment }}
+                        >
+                            <Button size="icon" variant="outline" className="rounded-lg">
+                                <Eye className="h-4 w-4" />
+                            </Button>
+                        </Link>
+                        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                            <AlertDialogTrigger asChild>
+                                <Button
+                                    size="icon"
+                                    variant="outline"
+                                    className="rounded-lg ml-2"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Esta acción no se puede deshacer. Esto eliminará permanentemente el pago seleccionado.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => {
+                                        handleDelete(payment.IdPagoOK);
+                                        setIsDeleteDialogOpen(false);
+                                    }}>
+                                        Eliminar
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div >
+                )
+            },
+        },
+    ]
 
     const table = useReactTable({
         data,
@@ -126,6 +196,7 @@ export default function PaymentTable({ data = [] }) {
         getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
+
         state: {
             sorting,
             columnVisibility,
@@ -136,10 +207,12 @@ export default function PaymentTable({ data = [] }) {
     useEffect(() => {
         const timer = setTimeout(() => {
             setLoadingTable(false)
+            setData(dataPagos)
         }, 1000)
 
+
         return () => clearTimeout(timer)
-    }, [])
+    }, [dataPagos])
 
     if (loadingTable) {
         return (
@@ -160,33 +233,39 @@ export default function PaymentTable({ data = [] }) {
 
     return (
         <div className='bg-white '>
-            <div className="flex items-center justify-between py-4">
-                <DropdownMenu >
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="rounded-lg">
-                            Columnas <ChevronDown className="ml-2 h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-white">
-                        {table
-                            .getAllColumns()
-                            .filter((column) => column.getCanHide())
-                            .map((column) => {
-                                return (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className="capitalize "
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                                    >
-                                        {column.id}
-                                    </DropdownMenuCheckboxItem>
-                                )
-                            })}
-                    </DropdownMenuContent>
-                </DropdownMenu>
+            <div className="flex items-center w-full gap-3 py-4">
+                <div className="flex">
+                    <NuevoPagoModal setData={setData} />
+                </div>
+                <div className="w-full">
+                    <DropdownMenu className="">
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="rounded-lg">
+                                Columnas <ChevronDown className="ml-2 h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-white">
+                            {table
+                                .getAllColumns()
+                                .filter((column) => column.getCanHide())
+                                .map((column) => {
+                                    return (
+                                        <DropdownMenuCheckboxItem
+                                            key={column.id}
+                                            className="capitalize "
+                                            checked={column.getIsVisible()}
+                                            onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                                        >
+                                            {column.id}
+                                        </DropdownMenuCheckboxItem>
+                                    )
+                                })}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+
                 <div className="flex items-center space-x-2">
-                    <p className="text-sm font-medium">Elementos por página</p>
+                    <p className="text-sm font-medium text-nowrap">Elementos por página</p>
                     <Select
                         className="bg-white"
                         value={`${table.getState().pagination.pageSize}`}
@@ -280,17 +359,4 @@ export default function PaymentTable({ data = [] }) {
             </div>
         </div>
     )
-}
-
-PaymentTable.propTypes = {
-    data: PropTypes.arrayOf(PropTypes.shape({
-        idpago: PropTypes.number.isRequired,
-        IdInstitutoOK: PropTypes.string.isRequired,
-        IdNegocioOK: PropTypes.string.isRequired,
-        IdPagoOK: PropTypes.string.isRequired,
-        IdPagoBK: PropTypes.string.isRequired,
-        IdOrdenOK: PropTypes.string.isRequired,
-        MontoTotal: PropTypes.number.isRequired,
-        Observacion: PropTypes.string.isRequired,
-    })).isRequired,
 }

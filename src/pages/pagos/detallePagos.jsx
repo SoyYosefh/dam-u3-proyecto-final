@@ -35,8 +35,23 @@ export default function DetallesPago() {
         <div className="container mx-auto py-10 px-4">
             <Card className="w-full">
                 <CardHeader>
-                    <CardTitle>Detalles del Pago #{paymentData.idpago}</CardTitle>
-                    <CardDescription>Información detallada del pago</CardDescription>
+                    <div className='flex'>
+                        <div className='w-full'>
+                            <CardTitle>Detalles del Pago #{paymentData.idpago}</CardTitle>
+                            <CardDescription>Información detallada del pago</CardDescription>
+                        </div>
+                        <div className="flex justify-end items-center p-2">
+                            <Link
+                                to="/pagos"
+                            >
+                                <Button
+                                    className="border border-gray-300 rounded-[5px] hover:bg-gray-200"
+                                >
+                                    Atras
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -87,22 +102,63 @@ export default function DetallesPago() {
                                             <InfoItem label="Monto" value={`$${pago.Monto.toFixed(2)}`} />
                                             <InfoItem label="ID Tipo Moneda" value={pago.IdTipoMonedaOK} />
                                             <h4 className="font-semibold mt-2">Pago con Tarjeta</h4>
-                                            <InfoItem label="Tipo de Tarjeta" value={pago.pago_tarjeta.IdTipoTarjertaOK} />
+                                            {/* <InfoItem label="Tipo de Tarjeta" value={pago.pago_tarjeta.IdTipoTarjertaOK ? pago.pago_tarjeta.IdTipoTarjertaOK : ""} />
                                             <InfoItem label="Banco" value={pago.pago_tarjeta.Banco} />
                                             <InfoItem label="Titular" value={pago.pago_tarjeta.NombreTitular} />
-                                            <InfoItem label="Número" value={pago.pago_tarjeta.Numero} />
+                                            <InfoItem label="Número" value={pago.pago_tarjeta.Numero} /> */}
+                                            {pago.pago_tarjeta ? (
+                                                <>
+                                                    <InfoItem
+                                                        label="Tipo de Tarjeta"
+                                                        value={pago.pago_tarjeta.IdTipoTarjertaOK || ""}
+                                                    />
+                                                    <InfoItem label="Banco" value={pago.pago_tarjeta.Banco || ""} />
+                                                    <InfoItem
+                                                        label="Titular"
+                                                        value={pago.pago_tarjeta.NombreTitular || ""}
+                                                    />
+                                                    <InfoItem
+                                                        label="Número"
+                                                        value={pago.pago_tarjeta.Numero || ""}
+                                                    />
+                                                </>
+                                            ) : ("Sin datos")}
                                             <h4 className="font-semibold mt-2">Datos de Transacción</h4>
-                                            <InfoItem label="ID Transacción" value={pago.datos_transaccion.IdTransaccion} />
-                                            <InfoItem label="Código Autorización" value={pago.datos_transaccion.CodigoAutoriza} />
-                                            <InfoItem label="Fecha Registro" value={pago.datos_transaccion.FechaReg.toLocaleString()} />
+                                            {pago.datos_transaccion ? (
+                                                <>
+                                                    <InfoItem
+                                                        label="ID Transacción"
+                                                        value={pago.datos_transaccion.IdTransaccion || ""}
+                                                    />
+                                                    <InfoItem
+                                                        label="Código Autorización"
+                                                        value={pago.datos_transaccion.CodigoAutoriza || ""}
+                                                    />
+                                                    <InfoItem
+                                                        label="Fecha Registro"
+                                                        value={
+                                                            pago.datos_transaccion.FechaReg
+                                                                ? pago.datos_transaccion.FechaReg.toLocaleString()
+                                                                : ""
+                                                        }
+                                                    />
+                                                </>
+                                            ) : ("Sin datos")}
                                             <h4 className="font-semibold mt-2">Estatus</h4>
-                                            {pago.estatus.map((status, statusIndex) => (
-                                                <div key={statusIndex}>
-                                                    <InfoItem label="ID Tipo Estatus" value={status.IdTipoEstatusOK} />
-                                                    <InfoItem label="Actual" value={status.Actual} />
-                                                    <InfoItem label="Observación" value={status.Observacion} />
-                                                </div>
-                                            ))}
+                                            {pago.estatus ?
+                                                pago.estatus.map((status, statusIndex) => (
+                                                    <div key={statusIndex}>
+                                                        <InfoItem
+                                                            label="ID Tipo Estatus"
+                                                            value={status.IdTipoEstatusOK || ""}
+                                                        />
+                                                        <InfoItem label="Actual" value={status.Actual || ""} />
+                                                        <InfoItem
+                                                            label="Observación"
+                                                            value={status.Observacion || ""}
+                                                        />
+                                                    </div>
+                                                )) : ("Sin datos")}
                                         </div>
                                     ))}
                                 </TabsContent>
@@ -171,18 +227,7 @@ export default function DetallesPago() {
                         </div>
                     </Tabs>
                 </CardContent>
-                <div className="flex justify-end items-center p-2">
-                    <Link
-                        to="/pagos"
-                    >
-                        <Button
-                            variant="outline"
-                            className="rounded-lg"
-                        >
-                            Atras
-                        </Button>
-                    </Link>
-                </div>
+
             </Card>
         </div>
     )
