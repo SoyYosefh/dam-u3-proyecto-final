@@ -1,6 +1,5 @@
-
 import Navbar from "@/components/Layouts/navbar";
-import { getAllPagos } from '@/api/get/getAllPagos'; // Ajusta la ruta según la ubicación de tu archivo
+import { getAllPagos } from '@/api/get/getAllPagos';
 import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Pagos from "@/pages/pagos/pagos";
@@ -8,16 +7,19 @@ import DetallesPago from "@/pages/pagos/detallePagos";
 import { deletePayment } from '@/api/delete/DeleteOnePayment';
 
 function App() {
-
   const [pagos, setPagos] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchPagos() {
+      setIsLoading(true);
       try {
         const data = await getAllPagos();
         setPagos(data);
       } catch (error) {
         console.error("Error al obtener los pagos:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -26,7 +28,7 @@ function App() {
 
   const handleDeletePago = async (idPago) => {
     try {
-      // Eliminar el pago de la base de datos
+      setIsLoading(true);
       const res = await deletePayment(idPago);
       const data = await getAllPagos();
       setPagos(data);
@@ -34,6 +36,8 @@ function App() {
     } catch (error) {
       console.error('Error al eliminar el pago:', error);
       return null;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -41,10 +45,26 @@ function App() {
     <Router>
       <Navbar />
       <Routes>
-        {/* Ruta para listar todos los pagos */}
-        <Route path="/" element={<Pagos pagos={pagos} onDeletePago={handleDeletePago} />} />
-        <Route path="/pagos" element={<Pagos pagos={pagos} onDeletePago={handleDeletePago} />} />
-        {/* Ruta para mostrar los detalles de un pago específico */}
+        <Route 
+          path="/" 
+          element={
+            <Pagos 
+              pagos={pagos} 
+              onDeletePago={handleDeletePago} 
+              isLoading={isLoading}
+            />
+          } 
+        />
+        <Route 
+          path="/pagos" 
+          element={
+            <Pagos 
+              pagos={pagos} 
+              onDeletePago={handleDeletePago} 
+              isLoading={isLoading}
+            />
+          } 
+        />
         <Route path="/pagos/detalle" element={<DetallesPago />} />
       </Routes>
     </Router>
@@ -52,3 +72,4 @@ function App() {
 }
 
 export default App
+

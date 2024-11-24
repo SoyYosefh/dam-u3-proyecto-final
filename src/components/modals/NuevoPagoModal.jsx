@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from "@/components/ui/button"
@@ -22,9 +22,17 @@ import { addOnePayment } from '@/api/post/AddOnePayment'
 import { CirclePlus } from 'lucide-react'
 import { getAllPagos } from '@/api/get/getAllPagos'
 import { mainFormSchema } from "@/schemas/pagoPostSchema"
+import { EstatusTab } from '@/components/modals/tabsToAdd/EstatusTab'
+import { FacturaTab } from '@/components/modals/tabsToAdd/FacturaTab'
+import { FormaPagoTab } from '@/components/modals/tabsToAdd/FormaPagoTab'
+import { InfoAdTab } from '@/components/modals/tabsToAdd/InfoAdTab'
 
 const tabs = [
     { id: 'main', label: 'Principal' },
+    { id: 'info_ad', label: 'Info Adicional' },
+    { id: 'forma_pago', label: 'Forma de Pago' },
+    { id: 'estatus', label: 'Estatus' },
+    { id: 'factura', label: 'Factura' },
 ]
 
 export default function PaymentFormModal({ setData }) {
@@ -32,7 +40,7 @@ export default function PaymentFormModal({ setData }) {
     const [activeTab, setActiveTab] = useState("main")
     const [formStatus, setFormStatus] = useState(null)
 
-    const { control, handleSubmit, setValue, getValues, formState: { errors, isValid }, reset } = useForm({
+    const { control, handleSubmit, getValues, formState: { errors, isValid }, reset } = useForm({
         resolver: zodResolver(mainFormSchema),
         mode: "onChange",
         defaultValues: {
@@ -51,20 +59,19 @@ export default function PaymentFormModal({ setData }) {
         },
     })
 
+    console.log(getValues())
+
     const onSubmit = async () => {
         try {
-            setValue('info_ad', [])
-            setValue('forma_pago', [])
-            setValue('estatus', [])
-            setValue('factura', [])
-
             const updatedData = getValues()
 
             const response = await addOnePayment(updatedData)
 
             if (!response) {
+                setFormStatus({ type: 'error', message: 'No se recibió respuesta al agregar el pago' })
                 throw new Error("No se recibió respuesta al agregar el pago")
             }
+            setFormStatus({ type: 'success', message: 'Formulario enviado con éxito' })
 
             const pagosActualizados = await getAllPagos()
 
@@ -77,7 +84,11 @@ export default function PaymentFormModal({ setData }) {
 
             reset()
 
-            setTimeout(() => setIsOpen(false), 2000)
+            setTimeout(() => {
+                setIsOpen(false);
+                setFormStatus(null); // Limpiar el estado del formulario después de cerrar
+            }, 2000);
+
         } catch (error) {
             console.error("<<ERROR>> Error durante el envío del formulario:", error)
 
@@ -88,6 +99,15 @@ export default function PaymentFormModal({ setData }) {
         }
     }
 
+    // Reset form when modal is closed
+    useEffect(() => {
+        if (!isOpen) {
+            reset()
+            setActiveTab("main")
+            setFormStatus(null)
+        }
+    }, [isOpen, reset])
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
@@ -97,6 +117,22 @@ export default function PaymentFormModal({ setData }) {
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl h-[90vh] bg-gray-900 text-white">
+                {formStatus && (
+                    <Alert
+                        variant={formStatus.type === 'success' ? 'success' : 'destructive'}
+                        className="mt-4"
+                    >
+                        {formStatus.type === 'success' ? (
+                            <CheckCircledIcon className="h-4 w-4" />
+                        ) : (
+                            <CrossCircledIcon className="h-4 w-4" />
+                        )}
+                        <AlertTitle>
+                            {formStatus.type === 'success' ? 'Éxito' : 'Error'}
+                        </AlertTitle>
+                        <AlertDescription>{formStatus.message}</AlertDescription>
+                    </Alert>
+                )}
                 <DialogHeader>
                     <DialogTitle className="text-white">Crear Nuevo Pago</DialogTitle>
                 </DialogHeader>
@@ -105,8 +141,8 @@ export default function PaymentFormModal({ setData }) {
                         <Tabs value={activeTab} onValueChange={setActiveTab}>
                             <TabsList className="grid w-full grid-cols-6 bg-gray-800">
                                 {tabs.map((tab) => (
-                                    <TabsTrigger 
-                                        key={tab.id} 
+                                    <TabsTrigger
+                                        key={tab.id}
                                         value={tab.id}
                                         className="data-[state=active]:bg-gray-700 data-[state=active]:text-white"
                                     >
@@ -117,16 +153,22 @@ export default function PaymentFormModal({ setData }) {
                             <TabsContent value="main">
                                 <MainTab control={control} errors={errors} />
                             </TabsContent>
+                            <TabsContent value="info_ad">
+                                <InfoAdTab control={control} errors={errors} />
+                            </TabsContent>
+                            <TabsContent value="forma_pago">
+                                <FormaPagoTab control={control} errors={errors} />
+                            </TabsContent>
+                            <TabsContent value="estatus">
+                                <EstatusTab control={control} errors={errors} />
+                            </TabsContent>
+                            <TabsContent value="factura">
+                                <FacturaTab control={control} errors={errors} />
+                            </TabsContent>
                         </Tabs>
                         <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={!isValid}>Enviar</Button>
 
-                        {formStatus && (
-                            <Alert variant={formStatus.type === 'success' ? 'default' : 'destructive'} className="bg-gray-800 border-gray-700 text-white">
-                                {formStatus.type === 'success' ? <CheckCircledIcon className="h-4 w-4 text-green-400" /> : <CrossCircledIcon className="h-4 w-4 text-red-400" />}
-                                <AlertTitle>{formStatus.type === 'success' ? 'Éxito' : 'Error'}</AlertTitle>
-                                <AlertDescription>{formStatus.message}</AlertDescription>
-                            </Alert>
-                        )}
+
                     </form>
                 </ScrollArea>
             </DialogContent>
