@@ -116,23 +116,7 @@ export default function PaymentFormModal({ setData }) {
                     Pago
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl h-[90vh] bg-gray-900 text-white">
-                {formStatus && (
-                    <Alert
-                        variant={formStatus.type === 'success' ? 'success' : 'destructive'}
-                        className="mt-4"
-                    >
-                        {formStatus.type === 'success' ? (
-                            <CheckCircledIcon className="h-4 w-4" />
-                        ) : (
-                            <CrossCircledIcon className="h-4 w-4" />
-                        )}
-                        <AlertTitle>
-                            {formStatus.type === 'success' ? 'Éxito' : 'Error'}
-                        </AlertTitle>
-                        <AlertDescription>{formStatus.message}</AlertDescription>
-                    </Alert>
-                )}
+            <DialogContent className="max-w-4xl h-[90vh] bg-gray-900 text-white flex flex-col">
                 <DialogHeader>
                     <DialogTitle className="text-white">Crear Nuevo Pago</DialogTitle>
                 </DialogHeader>
@@ -171,6 +155,22 @@ export default function PaymentFormModal({ setData }) {
 
                     </form>
                 </ScrollArea>
+                {formStatus && (
+                    <Alert
+                        variant={formStatus.type === 'success' ? 'success' : 'destructive'}
+                        className="mt-4"
+                    >
+                        {formStatus.type === 'success' ? (
+                            <CheckCircledIcon className="h-4 w-4" />
+                        ) : (
+                            <CrossCircledIcon className="h-4 w-4" />
+                        )}
+                        <AlertTitle>
+                            {formStatus.type === 'success' ? 'Éxito' : 'Error'}
+                        </AlertTitle>
+                        <AlertDescription>{formStatus.message}</AlertDescription>
+                    </Alert>
+                )}
             </DialogContent>
         </Dialog>
     )
