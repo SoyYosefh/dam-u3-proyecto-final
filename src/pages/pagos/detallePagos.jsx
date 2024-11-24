@@ -1,53 +1,51 @@
-
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
 
 export default function DetallesPago() {
     const [activeTab, setActiveTab] = useState("general")
-    const location = useLocation();
-    const [loading, setLoading] = useState(true);
-    const { pago } = location.state || {}; // Extrae el objeto 'pago'
-    const paymentData = pago || {}; // Si 'pago' no existe, asigna un objeto vacío
+    const location = useLocation()
+    const [loading, setLoading] = useState(true)
+    const { pago } = location.state || {}
+    const paymentData = pago || {}
 
     useEffect(() => {
-        const timer = setTimeout(() => setLoading(false), 1000);
-        return () => clearTimeout(timer);
-    }, []);
+        const timer = setTimeout(() => setLoading(false), 1000)
+        return () => clearTimeout(timer)
+    }, [])
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen">
+            <div className="flex justify-center items-center h-screen bg-gray-900 text-white">
                 <div className="flex flex-row items-center gap-4 text-center">
-                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-500"></div>
+                    <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-300"></div>
                     <p className="text-lg font-medium">Cargando detalles del pago...</p>
                 </div>
             </div>
-        );
+        )
     }
 
     return (
-        <div className="container mx-auto py-10 px-4">
-            <Card className="w-full">
+        <div className=" mx-auto py-10 px-4 bg-gray-900 text-white">
+            <Card className="w-full bg-gray-800 border-gray-700">
                 <CardHeader>
                     <div className='flex'>
                         <div className='w-full'>
-                            <CardTitle>Detalles del Pago #{paymentData.idpago}</CardTitle>
-                            <CardDescription>Información detallada del pago</CardDescription>
+                            <CardTitle className="text-white">Detalles del Pago #{paymentData.idpago}</CardTitle>
+                            <CardDescription className="text-gray-400">Información detallada del pago</CardDescription>
                         </div>
                         <div className="flex justify-end items-center p-2">
-                            <Link
-                                to="/pagos"
-                            >
+                            <Link to="/pagos">
                                 <Button
-                                    className="border border-gray-300 rounded-[5px] hover:bg-gray-200"
+                                    className="bg-gray-700 text-white hover:bg-gray-600"
                                 >
-                                    Atras
+                                    Atrás
                                 </Button>
                             </Link>
                         </div>
@@ -55,16 +53,16 @@ export default function DetallesPago() {
                 </CardHeader>
                 <CardContent>
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                        <TabsList className="w-full flex flex-wrap justify-start mb-4">
-                            <TabsTrigger value="general" className="flex-grow sm:flex-grow-0">General</TabsTrigger>
-                            <TabsTrigger value="payment" className="flex-grow sm:flex-grow-0">Forma de Pago</TabsTrigger>
-                            <TabsTrigger value="invoice" className="flex-grow sm:flex-grow-0">Factura</TabsTrigger>
-                            <TabsTrigger value="status" className="flex-grow sm:flex-grow-0">Estatus</TabsTrigger>
+                        <TabsList className="w-full flex flex-wrap justify-start mb-4 bg-gray-700">
+                            <TabsTrigger value="general" className="flex-grow sm:flex-grow-0 data-[state=active]:bg-gray-600 data-[state=active]:text-white">General</TabsTrigger>
+                            <TabsTrigger value="payment" className="flex-grow sm:flex-grow-0 data-[state=active]:bg-gray-600 data-[state=active]:text-white">Forma de Pago</TabsTrigger>
+                            <TabsTrigger value="invoice" className="flex-grow sm:flex-grow-0 data-[state=active]:bg-gray-600 data-[state=active]:text-white">Factura</TabsTrigger>
+                            <TabsTrigger value="status" className="flex-grow sm:flex-grow-0 data-[state=active]:bg-gray-600 data-[state=active]:text-white">Estatus</TabsTrigger>
                         </TabsList>
-                        <div className="border rounded-lg p-4">
+                        <div className="border border-gray-700 rounded-lg p-4 bg-gray-800">
                             <ScrollArea className="h-[500px] w-full rounded-md">
                                 <TabsContent value="general">
-                                    <h3 className="text-lg font-semibold mb-2">Información General</h3>
+                                    <h3 className="text-lg font-semibold mb-2 text-white">Información General</h3>
                                     <div className="grid gap-2">
                                         <InfoItem label="ID Pago" value={paymentData.idpago} />
                                         <InfoItem label="ID Instituto" value={paymentData.IdInstitutoOK} />
@@ -75,9 +73,9 @@ export default function DetallesPago() {
                                         <InfoItem label="Monto Total" value={`$${paymentData.MontoTotal.toFixed(2)}`} />
                                         <InfoItem label="Observación" value={paymentData.Observacion} />
                                     </div>
-                                    <h3 className="text-lg font-semibold mt-4 mb-2">Información Adicional</h3>
+                                    <h3 className="text-lg font-semibold mt-4 mb-2 text-white">Información Adicional</h3>
                                     {paymentData.info_ad.map((info, index) => (
-                                        <div key={index} className="mb-4 p-2 bg-gray-100 rounded">
+                                        <div key={index} className="mb-4 p-2 bg-gray-700 rounded">
                                             <InfoItem label="ID Etiqueta" value={info.IdEtiquetaOK} />
                                             <InfoItem label="Etiqueta" value={info.Etiqueta} />
                                             <InfoItem label="Valor" value={info.Valor} />
@@ -95,17 +93,13 @@ export default function DetallesPago() {
                                     ))}
                                 </TabsContent>
                                 <TabsContent value="payment">
-                                    <h3 className="text-lg font-semibold mb-2">Forma de Pago</h3>
+                                    <h3 className="text-lg font-semibold mb-2 text-white">Forma de Pago</h3>
                                     {paymentData.forma_pago.map((pago, index) => (
-                                        <div key={index} className="mb-4 p-2 bg-gray-100 rounded">
+                                        <div key={index} className="mb-4 p-2 bg-gray-700 rounded">
                                             <InfoItem label="ID Tipo Método" value={pago.IdTipoMetodoOK} />
                                             <InfoItem label="Monto" value={`$${pago.Monto.toFixed(2)}`} />
                                             <InfoItem label="ID Tipo Moneda" value={pago.IdTipoMonedaOK} />
-                                            <h4 className="font-semibold mt-2">Pago con Tarjeta</h4>
-                                            {/* <InfoItem label="Tipo de Tarjeta" value={pago.pago_tarjeta.IdTipoTarjertaOK ? pago.pago_tarjeta.IdTipoTarjertaOK : ""} />
-                                            <InfoItem label="Banco" value={pago.pago_tarjeta.Banco} />
-                                            <InfoItem label="Titular" value={pago.pago_tarjeta.NombreTitular} />
-                                            <InfoItem label="Número" value={pago.pago_tarjeta.Numero} /> */}
+                                            <h4 className="font-semibold mt-2 text-white">Pago con Tarjeta</h4>
                                             {pago.pago_tarjeta ? (
                                                 <>
                                                     <InfoItem
@@ -122,8 +116,8 @@ export default function DetallesPago() {
                                                         value={pago.pago_tarjeta.Numero || ""}
                                                     />
                                                 </>
-                                            ) : ("Sin datos")}
-                                            <h4 className="font-semibold mt-2">Datos de Transacción</h4>
+                                            ) : (<span className="text-gray-400">Sin datos</span>)}
+                                            <h4 className="font-semibold mt-2 text-white">Datos de Transacción</h4>
                                             {pago.datos_transaccion ? (
                                                 <>
                                                     <InfoItem
@@ -143,8 +137,8 @@ export default function DetallesPago() {
                                                         }
                                                     />
                                                 </>
-                                            ) : ("Sin datos")}
-                                            <h4 className="font-semibold mt-2">Estatus</h4>
+                                            ) : (<span className="text-gray-400">Sin datos</span>)}
+                                            <h4 className="font-semibold mt-2 text-white">Estatus</h4>
                                             {pago.estatus ?
                                                 pago.estatus.map((status, statusIndex) => (
                                                     <div key={statusIndex}>
@@ -158,14 +152,14 @@ export default function DetallesPago() {
                                                             value={status.Observacion || ""}
                                                         />
                                                     </div>
-                                                )) : ("Sin datos")}
+                                                )) : (<span className="text-gray-400">Sin datos</span>)}
                                         </div>
                                     ))}
                                 </TabsContent>
                                 <TabsContent value="invoice">
-                                    <h3 className="text-lg font-semibold mb-2">Factura</h3>
+                                    <h3 className="text-lg font-semibold mb-2 text-white">Factura</h3>
                                     {paymentData.factura.map((factura, index) => (
-                                        <div key={index} className="mb-4 p-2 bg-gray-100 rounded">
+                                        <div key={index} className="mb-4 p-2 bg-gray-700 rounded">
                                             <InfoItem label="ID Persona" value={factura.IdPersonaOK} />
                                             <InfoItem label="Nombre" value={factura.Nombre} />
                                             <InfoItem label="RFC" value={factura.RFC} />
@@ -173,7 +167,7 @@ export default function DetallesPago() {
                                             <InfoItem label="Teléfono" value={factura.Telefono} />
                                             <InfoItem label="ID Tipo Factura" value={factura.IdTipoFacturaOK} />
                                             <InfoItem label="ID Tipo Pago" value={factura.IdTipoPago} />
-                                            <h4 className="font-semibold mt-2">Domicilio</h4>
+                                            <h4 className="font-semibold mt-2 text-white">Domicilio</h4>
                                             {factura.domicilio.map((dom, domIndex) => (
                                                 <div key={domIndex}>
                                                     <InfoItem label="Calle y Número" value={dom.CalleNumero} />
@@ -185,14 +179,14 @@ export default function DetallesPago() {
                                                     <InfoItem label="Colonia" value={dom.Colonia} />
                                                 </div>
                                             ))}
-                                            <h4 className="font-semibold mt-2">Productos</h4>
+                                            <h4 className="font-semibold mt-2 text-white">Productos</h4>
                                             {factura.productos.map((producto, prodIndex) => (
                                                 <div key={prodIndex} className="mt-2">
                                                     <InfoItem label="ID Producto/Servicio" value={producto.IdProdServOK} />
                                                     <InfoItem label="ID Presentación" value={producto.IdPresentaOK} />
                                                     <InfoItem label="Cantidad" value={producto.Cantidad} />
                                                     <InfoItem label="Precio Unitario" value={`$${producto.PrecioUnitario.toFixed(2)}`} />
-                                                    <h5 className="font-semibold mt-1">Descuentos</h5>
+                                                    <h5 className="font-semibold mt-1 text-white">Descuentos</h5>
                                                     {producto.descuentos.map((descuento, descIndex) => (
                                                         <div key={descIndex}>
                                                             <InfoItem label="ID Tipo Descuento" value={descuento.IdTipoDescuentoOK} />
@@ -206,9 +200,9 @@ export default function DetallesPago() {
                                     ))}
                                 </TabsContent>
                                 <TabsContent value="status">
-                                    <h3 className="text-lg font-semibold mb-2">Estatus del Pago</h3>
+                                    <h3 className="text-lg font-semibold mb-2 text-white">Estatus del Pago</h3>
                                     {paymentData.estatus.map((status, index) => (
-                                        <div key={index} className="mb-4 p-2 bg-gray-100 rounded">
+                                        <div key={index} className="mb-4 p-2 bg-gray-700 rounded">
                                             <InfoItem label="ID Tipo Estatus" value={status.IdTipoEstatusOK} />
                                             <InfoItem label="Actual" value={status.Actual} />
                                             <InfoItem label="Observación" value={status.Observacion} />
@@ -219,7 +213,8 @@ export default function DetallesPago() {
                                                     <InfoItem label="Fecha Registro" value={reg.FechaReg.toLocaleString()} />
                                                     <InfoItem label="Usuario Registro" value={reg.UsuarioReg} />
                                                 </div>
-                                            ))}
+                
+))}
                                         </div>
                                     ))}
                                 </TabsContent>
@@ -227,18 +222,17 @@ export default function DetallesPago() {
                         </div>
                     </Tabs>
                 </CardContent>
-
             </Card>
         </div>
     )
 }
 
-// eslint-disable-next-line react/prop-types
 function InfoItem({ label, value }) {
     return (
         <div className="grid grid-cols-2 gap-1">
-            <Label className="font-medium">{label}:</Label>
-            <span>{value}</span>
+            <Label className="font-medium text-gray-300">{label}:</Label>
+            <span className="text-gray-100">{value}</span>
         </div>
     )
 }
+
