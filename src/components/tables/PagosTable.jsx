@@ -1,34 +1,6 @@
 /* eslint-disable react/prop-types */
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Link } from "react-router-dom"
-import { useToast } from "@/hooks/use-toast"
-import {
-	flexRender,
-	getCoreRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	getFilteredRowModel,
-	useReactTable,
-} from '@tanstack/react-table'
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, Eye, Trash2, Edit, Loader2, X } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table"
+import NuevoPagoModal from '@/components/modals/NuevoPagoModal'
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -40,13 +12,41 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table"
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip"
-import NuevoPagoModal from '@/components/modals/NuevoPagoModal'
+import { useToast } from "@/hooks/use-toast"
+import {
+	flexRender,
+	getCoreRowModel,
+	getFilteredRowModel,
+	getPaginationRowModel,
+	getSortedRowModel,
+	useReactTable,
+} from '@tanstack/react-table'
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, Eye, Loader2, Trash2, X } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Link } from "react-router-dom"
 
 const SortableHeader = ({ column, title }) => {
 	return (
@@ -224,7 +224,7 @@ export default function PaymentTable({ dataPagos = [], onDeletePago, isLoading }
 						</Tooltip>
 					</TooltipProvider>
 
-					<TooltipProvider>
+					{/* <TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<Button
@@ -245,7 +245,7 @@ export default function PaymentTable({ dataPagos = [], onDeletePago, isLoading }
 								<p>Editar pago</p>
 							</TooltipContent>
 						</Tooltip>
-					</TooltipProvider>
+					</TooltipProvider> */}
 
 					<TooltipProvider>
 						<Tooltip>

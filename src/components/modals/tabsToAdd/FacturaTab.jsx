@@ -1,11 +1,11 @@
 /* eslint-disable react/prop-types */
-import { useFieldArray } from 'react-hook-form'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { PlusCircle, Trash2 } from 'lucide-react'
+import { useFieldArray } from 'react-hook-form'
 
 // eslint-disable-next-line no-unused-vars
 export function FacturaTab({ control, errors }) {

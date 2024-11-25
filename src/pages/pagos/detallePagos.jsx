@@ -1,19 +1,13 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { useLocation, useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Link } from "react-router-dom"
-import { ChevronLeft, CreditCard, FileText, Info, AlertCircle, Edit, Save, X, Trash, Plus } from 'lucide-react'
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import UpdatePayment from '@/api/put/UpdatePayment'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { useToast } from "@/hooks/use-toast"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
     Select,
     SelectContent,
@@ -21,6 +15,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
+import { useToast } from "@/hooks/use-toast"
+import { AlertCircle, ChevronLeft, CreditCard, Edit, FileText, Info, Plus, Save, Trash, X } from 'lucide-react'
+import { Link, useLocation, useNavigate } from "react-router-dom"
 
 export default function DetallesPago({ onUpdatePagos }) {
     const [activeTab, setActiveTab] = useState("general")

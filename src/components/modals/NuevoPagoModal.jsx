@@ -1,11 +1,13 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { getAllPagos } from '@/api/get/getAllPagos'
+import { addOnePayment } from '@/api/post/AddOnePayment'
+import { EstatusTab } from '@/components/modals/tabsToAdd/EstatusTab'
+import { FacturaTab } from '@/components/modals/tabsToAdd/FacturaTab'
+import { FormaPagoTab } from '@/components/modals/tabsToAdd/FormaPagoTab'
+import { InfoAdTab } from '@/components/modals/tabsToAdd/InfoAdTab'
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent } from "@/components/ui/card"
 import {
     Dialog,
     DialogContent,
@@ -13,19 +15,17 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Card, CardContent } from "@/components/ui/card"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons"
-import { addOnePayment } from '@/api/post/AddOnePayment'
-import { CirclePlus } from 'lucide-react'
-import { getAllPagos } from '@/api/get/getAllPagos'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
 import { mainFormSchema } from "@/schemas/pagoPostSchema"
-import { EstatusTab } from '@/components/modals/tabsToAdd/EstatusTab'
-import { FacturaTab } from '@/components/modals/tabsToAdd/FacturaTab'
-import { FormaPagoTab } from '@/components/modals/tabsToAdd/FormaPagoTab'
-import { InfoAdTab } from '@/components/modals/tabsToAdd/InfoAdTab'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons"
+import { CirclePlus } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 
 const tabs = [
     { id: 'main', label: 'Principal' },

@@ -1,10 +1,10 @@
-import Navbar from "@/components/Layouts/navbar";
-import { getAllPagos } from '@/api/get/getAllPagos';
-import { useCallback, useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Pagos from "@/pages/pagos/pagos";
-import DetallesPago from "@/pages/pagos/detallePagos";
 import { deletePayment } from '@/api/delete/DeleteOnePayment';
+import { getAllPagos } from '@/api/get/getAllPagos';
+import Navbar from "@/components/Layouts/navbar";
+import DetallesPago from "@/pages/pagos/detallePagos";
+import Pagos from "@/pages/pagos/pagos";
+import { useCallback, useEffect, useState } from "react";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
 function App() {
   const [pagos, setPagos] = useState([]);
