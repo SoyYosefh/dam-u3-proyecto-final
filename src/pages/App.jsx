@@ -1,6 +1,6 @@
 import Navbar from "@/components/Layouts/navbar";
 import { getAllPagos } from '@/api/get/getAllPagos';
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Pagos from "@/pages/pagos/pagos";
 import DetallesPago from "@/pages/pagos/detallePagos";
@@ -10,21 +10,21 @@ function App() {
   const [pagos, setPagos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchPagos() {
-      setIsLoading(true);
-      try {
-        const data = await getAllPagos();
-        setPagos(data);
-      } catch (error) {
-        console.error("Error al obtener los pagos:", error);
-      } finally {
-        setIsLoading(false);
-      }
+  const fetchPagos = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await getAllPagos();
+      setPagos(data);
+    } catch (error) {
+      console.error("Error al obtener los pagos:", error);
+    } finally {
+      setIsLoading(false);
     }
-
-    fetchPagos();
   }, []);
+
+  useEffect(() => {
+    fetchPagos();
+  }, [fetchPagos]);
 
   const handleDeletePago = async (idPago) => {
     try {
@@ -41,31 +41,39 @@ function App() {
     }
   };
 
+  const handleUpdatePagos = useCallback(() => {
+    fetchPagos();
+  }, [fetchPagos]);
+
   return (
     <Router>
       <Navbar />
       <Routes>
-        <Route 
-          path="/" 
+        <Route
+          path="/"
           element={
-            <Pagos 
-              pagos={pagos} 
-              onDeletePago={handleDeletePago} 
+            <Pagos
+              pagos={pagos}
+              onDeletePago={handleDeletePago}
               isLoading={isLoading}
             />
-          } 
+          }
         />
-        <Route 
-          path="/pagos" 
+        <Route
+          path="/pagos"
           element={
-            <Pagos 
-              pagos={pagos} 
-              onDeletePago={handleDeletePago} 
+            <Pagos
+              pagos={pagos}
+              onDeletePago={handleDeletePago}
               isLoading={isLoading}
             />
-          } 
+          }
         />
-        <Route path="/pagos/detalle" element={<DetallesPago />} />
+        <Route path="/pagos/detalle" element={
+          <DetallesPago
+            onUpdatePagos={handleUpdatePagos}
+          />
+        } />
       </Routes>
     </Router>
   )

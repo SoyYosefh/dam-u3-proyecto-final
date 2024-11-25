@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export async function updatePayment(payment) {
+export default async function updatePayment(payment) {
 
     try {
         const response = await axios.put(`${import.meta.env.VITE_REST_API}/${payment.IdPagoOK}`, payment);
