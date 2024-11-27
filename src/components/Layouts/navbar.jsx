@@ -1,5 +1,3 @@
-'use client'
-
 import { User, LogOut } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import {
@@ -10,14 +8,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export default function Navbar() {
-
   return (
-    <nav className="bg-white border-b">
+    <nav className="bg-gray-900 border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <a href="/" className="text-2xl font-bold text-primary">
-              Mi Aplicación
+            <a href="/" className="text-2xl font-bold text-white">
+              Equipo 3
             </a>
           </div>
           <div className="">
@@ -41,19 +38,19 @@ function UserMenu() {
           />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-white border shadow-md">
-        <DropdownMenuItem className="flex items-center hover:bg-accent">
+      <DropdownMenuContent align="end" className="bg-gray-800 border border-gray-700 shadow-md">
+        <DropdownMenuItem className="flex items-center hover:bg-gray-700 text-gray-200">
           <User className="mr-2 h-4 w-4" />
           <span>Equipo 6</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="hover:bg-accent">
-          <a href="/" className="flex items-center w-full">
+        <DropdownMenuItem className="hover:bg-gray-700">
+          <a href="/" className="flex items-center w-full text-gray-200">
             <User className="mr-2 h-4 w-4" />
             <span>Perfil</span>
           </a>
         </DropdownMenuItem>
-        <DropdownMenuItem className="hover:bg-accent">
-          <button className="flex items-center w-full" onClick={() => console.log('Cerrar sesión')}>
+        <DropdownMenuItem className="hover:bg-gray-700">
+          <button className="flex items-center w-full text-gray-200" onClick={() => console.log('Cerrar sesión')}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Cerrar sesión</span>
           </button>
@@ -62,3 +59,4 @@ function UserMenu() {
     </DropdownMenu>
   )
 }
+

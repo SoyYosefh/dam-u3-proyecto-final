@@ -1,13 +1,13 @@
 /* eslint-disable react/prop-types */
-
-import { useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { getAllPagos } from '@/api/get/getAllPagos'
+import { addOnePayment } from '@/api/post/AddOnePayment'
+import { EstatusTab } from '@/components/modals/tabsToAdd/EstatusTab'
+import { FacturaTab } from '@/components/modals/tabsToAdd/FacturaTab'
+import { FormaPagoTab } from '@/components/modals/tabsToAdd/FormaPagoTab'
+import { InfoAdTab } from '@/components/modals/tabsToAdd/InfoAdTab'
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent } from "@/components/ui/card"
 import {
     Dialog,
     DialogContent,
@@ -15,21 +15,24 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Card, CardContent } from "@/components/ui/card"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
+import { mainFormSchema } from "@/schemas/pagoPostSchema"
+import { zodResolver } from '@hookform/resolvers/zod'
 import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons"
-import { addOnePayment } from '@/api/post/AddOnePayment';
-import { CirclePlus } from 'lucide-react';
-import { getAllPagos } from '@/api/get/getAllPagos';
-import { mainFormSchema } from "@/schemas/pagoPostSchema";
+import { CirclePlus } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
 
-
-// Definición de pestañas
 const tabs = [
     { id: 'main', label: 'Principal' },
-    // Agrega más pestañas aquí
+    { id: 'info_ad', label: 'Info Adicional' },
+    { id: 'forma_pago', label: 'Forma de Pago' },
+    { id: 'estatus', label: 'Estatus' },
+    { id: 'factura', label: 'Factura' },
 ]
 
 export default function PaymentFormModal({ setData }) {
@@ -37,7 +40,7 @@ export default function PaymentFormModal({ setData }) {
     const [activeTab, setActiveTab] = useState("main")
     const [formStatus, setFormStatus] = useState(null)
 
-    const { control, handleSubmit, setValue, getValues, formState: { errors, isValid }, reset } = useForm({
+    const { control, handleSubmit, getValues, formState: { errors, isValid }, reset } = useForm({
         resolver: zodResolver(mainFormSchema),
         mode: "onChange",
         defaultValues: {
@@ -56,64 +59,77 @@ export default function PaymentFormModal({ setData }) {
         },
     })
 
-    // eslint-disable-next-line no-unused-vars
-    const onSubmit = async (data) => {
+    console.log(getValues())
+
+    const onSubmit = async () => {
         try {
-            // Actualizar valores específicos antes de enviar
-            setValue('info_ad', []);
-            setValue('forma_pago', []);
-            setValue('estatus', []);
-            setValue('factura', []);
+            const updatedData = getValues()
 
-            const updatedData = getValues(); // Obtener los valores actualizados
-
-            // Llamar al método de agregar pago
-            const response = await addOnePayment(updatedData);
+            const response = await addOnePayment(updatedData)
 
             if (!response) {
-                throw new Error("No se recibió respuesta al agregar el pago");
+                setFormStatus({ type: 'error', message: 'No se recibió respuesta al agregar el pago' })
+                throw new Error("No se recibió respuesta al agregar el pago")
             }
+            setFormStatus({ type: 'success', message: 'Formulario enviado con éxito' })
 
-            // Actualizar la lista de pagos tras el éxito de la operación
-            const pagosActualizados = await getAllPagos();
+            const pagosActualizados = await getAllPagos()
 
             if (!pagosActualizados) {
-                throw new Error("No se pudo obtener la lista actualizada de pagos");
+                throw new Error("No se pudo obtener la lista actualizada de pagos")
             }
 
-            setData(pagosActualizados); // Actualizar el estado con los datos obtenidos
-            setFormStatus({ type: 'success', message: 'Formulario enviado con éxito' });
+            setData(pagosActualizados)
+            setFormStatus({ type: 'success', message: 'Formulario enviado con éxito' })
 
-            reset(); // Resetear el formulario
+            reset()
 
-            // Cerrar el diálogo tras 2 segundos
-            setTimeout(() => setIsOpen(false), 2000);
+            setTimeout(() => {
+                setIsOpen(false);
+                setFormStatus(null); // Limpiar el estado del formulario después de cerrar
+            }, 2000);
+
         } catch (error) {
-            console.error("<<ERROR>> Error durante el envío del formulario:", error);
+            console.error("<<ERROR>> Error durante el envío del formulario:", error)
 
-            // Establecer el estado de error
             setFormStatus({
                 type: 'error',
                 message: error.message || 'Ocurrió un error al enviar el formulario',
-            });
+            })
         }
-    };
+    }
+
+    // Reset form when modal is closed
+    useEffect(() => {
+        if (!isOpen) {
+            reset()
+            setActiveTab("main")
+            setFormStatus(null)
+        }
+    }, [isOpen, reset])
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button>  <CirclePlus className='size-4 mr-2' /> Pago</Button>
+                <Button variant="outline" className="bg-gray-800 text-white hover:bg-gray-700">
+                    <CirclePlus className="h-4 w-4 mr-2" />
+                    Pago
+                </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl h-[90vh]">
+            <DialogContent className="max-w-4xl h-[90vh] bg-gray-900 text-white flex flex-col">
                 <DialogHeader>
-                    <DialogTitle>Crear Nuevo Pago</DialogTitle>
+                    <DialogTitle className="text-white">Crear Nuevo Pago</DialogTitle>
                 </DialogHeader>
                 <ScrollArea className="h-full pr-4">
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         <Tabs value={activeTab} onValueChange={setActiveTab}>
-                            <TabsList className="grid w-full grid-cols-6">
+                            <TabsList className="grid w-full grid-cols-6 bg-gray-800">
                                 {tabs.map((tab) => (
-                                    <TabsTrigger key={tab.id} value={tab.id}>
+                                    <TabsTrigger
+                                        key={tab.id}
+                                        value={tab.id}
+                                        className="data-[state=active]:bg-gray-700 data-[state=active]:text-white"
+                                    >
                                         {tab.label}
                                     </TabsTrigger>
                                 ))}
@@ -121,19 +137,40 @@ export default function PaymentFormModal({ setData }) {
                             <TabsContent value="main">
                                 <MainTab control={control} errors={errors} />
                             </TabsContent>
-                            {/* Agrega más TabsContent para otras pestañas aquí */}
+                            <TabsContent value="info_ad">
+                                <InfoAdTab control={control} errors={errors} />
+                            </TabsContent>
+                            <TabsContent value="forma_pago">
+                                <FormaPagoTab control={control} errors={errors} />
+                            </TabsContent>
+                            <TabsContent value="estatus">
+                                <EstatusTab control={control} errors={errors} />
+                            </TabsContent>
+                            <TabsContent value="factura">
+                                <FacturaTab control={control} errors={errors} />
+                            </TabsContent>
                         </Tabs>
-                        <Button type="submit" className="w-full" disabled={!isValid}>Enviar</Button>
+                        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={!isValid}>Enviar</Button>
 
-                        {formStatus && (
-                            <Alert variant={formStatus.type === 'success' ? 'success' : 'destructive'}>
-                                {formStatus.type === 'success' ? <CheckCircledIcon className="h-4 w-4" /> : <CrossCircledIcon className="h-4 w-4" />}
-                                <AlertTitle>{formStatus.type === 'success' ? 'Éxito' : 'Error'}</AlertTitle>
-                                <AlertDescription>{formStatus.message}</AlertDescription>
-                            </Alert>
-                        )}
+
                     </form>
                 </ScrollArea>
+                {formStatus && (
+                    <Alert
+                        variant={formStatus.type === 'success' ? 'success' : 'destructive'}
+                        className="mt-4"
+                    >
+                        {formStatus.type === 'success' ? (
+                            <CheckCircledIcon className="h-4 w-4" />
+                        ) : (
+                            <CrossCircledIcon className="h-4 w-4" />
+                        )}
+                        <AlertTitle>
+                            {formStatus.type === 'success' ? 'Éxito' : 'Error'}
+                        </AlertTitle>
+                        <AlertDescription>{formStatus.message}</AlertDescription>
+                    </Alert>
+                )}
             </DialogContent>
         </Dialog>
     )
@@ -141,65 +178,65 @@ export default function PaymentFormModal({ setData }) {
 
 function MainTab({ control, errors }) {
     return (
-        <Card className="w-full">
+        <Card className="w-full bg-gray-800 text-white border-gray-700">
             <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <Label htmlFor="idpago">ID Pago</Label>
+                        <Label htmlFor="idpago" className="text-gray-300">ID Pago</Label>
                         <Controller
                             name="idpago"
                             control={control}
-                            render={({ field }) => <Input type="number" {...field} id="idpago" />}
+                            render={({ field }) => <Input type="number" {...field} id="idpago" className="bg-gray-700 text-white border-gray-600 focus:border-blue-500" />}
                         />
-                        {errors.idpago && <p className="text-red-500 text-sm">{errors.idpago.message}</p>}
+                        {errors.idpago && <p className="text-red-400 text-sm">{errors.idpago.message}</p>}
                     </div>
                     <div>
-                        <Label htmlFor="IdInstitutoOK">ID Instituto</Label>
+                        <Label htmlFor="IdInstitutoOK" className="text-gray-300">ID Instituto</Label>
                         <Controller
                             name="IdInstitutoOK"
                             control={control}
-                            render={({ field }) => <Input {...field} id="IdInstitutoOK" />}
+                            render={({ field }) => <Input {...field} id="IdInstitutoOK" className="bg-gray-700 text-white border-gray-600 focus:border-blue-500" />}
                         />
-                        {errors.IdInstitutoOK && <p className="text-red-500 text-sm">{errors.IdInstitutoOK.message}</p>}
+                        {errors.IdInstitutoOK && <p className="text-red-400 text-sm">{errors.IdInstitutoOK.message}</p>}
                     </div>
                     <div>
-                        <Label htmlFor="IdNegocioOK">ID Negocio</Label>
+                        <Label htmlFor="IdNegocioOK" className="text-gray-300">ID Negocio</Label>
                         <Controller
                             name="IdNegocioOK"
                             control={control}
-                            render={({ field }) => <Input {...field} id="IdNegocioOK" />}
+                            render={({ field }) => <Input {...field} id="IdNegocioOK" className="bg-gray-700 text-white border-gray-600 focus:border-blue-500" />}
                         />
-                        {errors.IdNegocioOK && <p className="text-red-500 text-sm">{errors.IdNegocioOK.message}</p>}
+                        {errors.IdNegocioOK && <p className="text-red-400 text-sm">{errors.IdNegocioOK.message}</p>}
                     </div>
                     <div>
-                        <Label htmlFor="IdPagoOK">ID Pago OK</Label>
+                        <Label htmlFor="IdPagoOK" className="text-gray-300">ID Pago OK</Label>
                         <Controller
                             name="IdPagoOK"
                             control={control}
-                            render={({ field }) => <Input {...field} id="IdPagoOK" />}
+                            render={({ field }) => <Input {...field} id="IdPagoOK" className="bg-gray-700 text-white border-gray-600 focus:border-blue-500" />}
                         />
-                        {errors.IdPagoOK && <p className="text-red-500 text-sm">{errors.IdPagoOK.message}</p>}
+                        {errors.IdPagoOK && <p className="text-red-400 text-sm">{errors.IdPagoOK.message}</p>}
                     </div>
                     <div>
-                        <Label htmlFor="IdPagoBK">ID Pago BK</Label>
+                        <Label htmlFor="IdPagoBK" className="text-gray-300">ID Pago BK</Label>
                         <Controller
                             name="IdPagoBK"
                             control={control}
-                            render={({ field }) => <Input {...field} id="IdPagoBK" />}
+                            render={({ field }) => <Input {...field} id="IdPagoBK" className="bg-gray-700 text-white border-gray-600 focus:border-blue-500" />}
                         />
-                        {errors.IdPagoBK && <p className="text-red-500 text-sm">{errors.IdPagoBK.message}</p>}
+                        {errors.IdPagoBK && <p className="text-red-400 text-sm">{errors.IdPagoBK.message}</p>}
                     </div>
                     <div>
-                        <Label htmlFor="IdOrdenOK">ID Orden</Label>
+                        <Label htmlFor="IdOrdenOK" className="text-gray-300">ID Orden</Label>
                         <Controller
                             name="IdOrdenOK"
                             control={control}
-                            render={({ field }) => <Input {...field} id="IdOrdenOK" />}
+                            render={({ field }) => <Input {...field} id="IdOrdenOK" className="bg-gray-700 text-white border-gray-600 focus:border-blue-500" />}
                         />
-                        {errors.IdOrdenOK && <p className="text-red-500 text-sm">{errors.IdOrdenOK.message}</p>}
+                        {errors.IdOrdenOK && <p className="text-red-400 text-sm">{errors.IdOrdenOK.message}</p>}
                     </div>
                     <div>
-                        <Label htmlFor="MontoTotal">Monto Total</Label>
+                        <Label htmlFor="MontoTotal" className="text-gray-300">Monto Total</Label>
                         <Controller
                             name="MontoTotal"
                             control={control}
@@ -209,22 +246,24 @@ function MainTab({ control, errors }) {
                                     {...field}
                                     id="MontoTotal"
                                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                    className="bg-gray-700 text-white border-gray-600 focus:border-blue-500"
                                 />
                             )}
                         />
-                        {errors.MontoTotal && <p className="text-red-500 text-sm">{errors.MontoTotal.message}</p>}
+                        {errors.MontoTotal && <p className="text-red-400 text-sm">{errors.MontoTotal.message}</p>}
                     </div>
                 </div>
                 <div className="mt-4">
-                    <Label htmlFor="Observacion">Observación</Label>
+                    <Label htmlFor="Observacion" className="text-gray-300">Observación</Label>
                     <Controller
                         name="Observacion"
                         control={control}
-                        render={({ field }) => <Textarea {...field} id="Observacion" />}
+                        render={({ field }) => <Textarea {...field} id="Observacion" className="bg-gray-700 text-white border-gray-600 focus:border-blue-500" />}
                     />
-                    {errors.Observacion && <p className="text-red-500 text-sm">{errors.Observacion.message}</p>}
+                    {errors.Observacion && <p className="text-red-400 text-sm">{errors.Observacion.message}</p>}
                 </div>
             </CardContent>
         </Card>
     )
 }
+

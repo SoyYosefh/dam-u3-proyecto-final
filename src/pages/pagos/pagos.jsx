@@ -4,9 +4,9 @@ import PaymentTable from "@/components/tables/PagosTable";
 function Pagos({ pagos, onDeletePago  }) {
 
     return (
-        <div className="m-5 p-5 rounded-xl border">
-            <h1>Pagos</h1>
-            <PaymentTable dataPagos={pagos} onDeletePago={onDeletePago}/>
+        <div className="p-5 border border-gray-700 bg-gray-900 text-white min-h-full ">
+            <h1 className="text-2xl font-bold mb-6">Pagos</h1>
+            <PaymentTable dataPagos={pagos} onDeletePago={onDeletePago} />
         </div>
     );
 }
